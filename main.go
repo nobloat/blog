@@ -38,6 +38,7 @@ var config = Config{
 		"GitHub":       "https://github.com/nobloat",
 		"nobloat.org":  "https://nobloat.org",
 		"zeitkapsl.eu": "https://zeitkapsl.eu",
+		"RSS":          "./feed.xml",
 	},
 }
 
@@ -128,9 +129,11 @@ func parseMarkdown(input string) (content string, title string) {
 	boldRe := regexp.MustCompile(`\*\*(.+?)\*\*`)
 	italicRe := regexp.MustCompile(`\*(.+?)\*`)
 	strikeRe := regexp.MustCompile(`~~(.+?)~~`)
+	imageRe := regexp.MustCompile(`!\[([^\]]*)\]\(([^)]+)\)`)
 
 	formatInline := func(text string) string {
 		text = html.EscapeString(text)
+		text = imageRe.ReplaceAllString(text, `<img src="$2" alt="$1">`)
 		text = codeRe.ReplaceAllString(text, "<code>$1</code>")
 		text = boldRe.ReplaceAllString(text, "<strong>$1</strong>")
 		text = strikeRe.ReplaceAllString(text, "<del>$1</del>")
@@ -138,7 +141,10 @@ func parseMarkdown(input string) (content string, title string) {
 		return text
 	}
 
-	title = lines[0][2:]
+	// First line is title
+	if len(lines) > 0 && strings.HasPrefix(lines[0], "# ") {
+		title = strings.TrimPrefix(lines[0], "# ")
+	}
 
 	for _, raw := range lines {
 		line := strings.TrimSpace(raw)
@@ -215,7 +221,7 @@ func parseMarkdown(input string) (content string, title string) {
 		out.WriteString("</ul>\n")
 	}
 	if inCode {
-		out.WriteString("</code></pre>\n") // ensure it's closed
+		out.WriteString("</code></pre>\n")
 	}
 
 	return out.String(), title
@@ -241,6 +247,7 @@ func generateIndex(posts []Post) {
 </head>
 <body>
 <h1>{{.Title}}</h1>
+<h2>Articles</h2>
 <ul>
 {{range .Posts}}<li><a href="{{.Slug}}.html">{{.Title}}</a></li>{{end}}
 </ul>
@@ -264,6 +271,9 @@ func generatePosts(posts []Post) {
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<nav>
+][ nobloat.org
+</nav>
 <article>{{.Content}}</article>
 <a href="index.html">Back to home</a>
 </body>
@@ -280,6 +290,7 @@ func copyStaticAssets() {
 	if err == nil {
 		_ = writeIfChanged("public/style.css", input)
 	}
+
 }
 
 func generateSitemap(posts []Post) {

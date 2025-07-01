@@ -20,9 +20,13 @@ But then reality hit.
 
 Worst of all: **gomobile was abandoned**. No meaningful updates in years, yet we were depending on it.
 
+
+
 ## What We Built Instead
 
 We now use a **custom native bridge**, powered by:
+
+![some test](https://picsum.photos/800)
 
 - ✨ **Protobuf for typed request/response definitions**
 - 🧵 **Cancellable async calls** (Kotlin coroutines, Swift async/await)

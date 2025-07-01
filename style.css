@@ -1,5 +1,5 @@
 body {
-    font-family: sans-serif;
+    font-family: monospace;
     margin: 2em;
     background: light-dark(#f7f8f9, #111);
     color: light-dark(#111, #f7f8f9);
@@ -42,4 +42,33 @@ pre {
     background: light-dark(#f4f4f4, #222);
     padding: 0.2em 0.4em;
     border-radius: 3px;
+}
+
+/* Prevent horizontal scrolling on mobile */
+html,
+body {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+/* Ensure code blocks don't force horizontal scroll */
+pre {
+    overflow-x: auto;
+    word-wrap: normal;
+    white-space: pre-wrap; /* Allow wrapping long code lines */
+}
+
+/* Make sure images scale responsively */
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Force words to break if needed (like long URLs or tokens) */
+p,
+li,
+h1,
+h2,
+h3 {
+    word-break: break-word;
 }
