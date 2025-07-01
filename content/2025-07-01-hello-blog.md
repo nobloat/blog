@@ -1,6 +1,6 @@
 # Ditching GoMobile: Building Our Own Native Bridge
 
-For the longest time, we used `gomobile` to bridge our Go-based core with Android and iOS. It seemed like the perfect solution—generate bindings, avoid boilerplate, and focus on logic. But as our product matured, `gomobile` started showing its cracks.
+For the longest time, we used `gomobile` to bridge our Go-based core with Android and iOS. It seemed like the perfect solution—generate bindings, avoid boilerplate, and focus on logic. But as **our product matured**, `gomobile` started showing its cracks.
 
 ## Why We Used GoMobile in the First Place
 

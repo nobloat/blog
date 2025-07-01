@@ -14,6 +14,7 @@ import (
 	"regexp"
 	"strings"
 	"time"
+	"unicode"
 
 	"github.com/fsnotify/fsnotify"
 )
@@ -40,6 +41,21 @@ var config = Config{
 		"zeitkapsl.eu": "https://zeitkapsl.eu",
 		"RSS":          "./feed.xml",
 	},
+}
+
+func sanitizeAnchor(input string) string {
+	var out strings.Builder
+	for _, r := range input {
+		switch {
+		case unicode.IsLetter(r), unicode.IsDigit(r):
+			out.WriteRune(r)
+		case r == '-' || r == '_' || r == '.' || r == '~':
+			out.WriteRune(r)
+		default:
+			out.WriteRune('-') // replace unsafe characters with dash
+		}
+	}
+	return strings.ToLower(out.String())
 }
 
 func buildSite() {
@@ -190,7 +206,8 @@ func parseMarkdown(input string) (content string, title string) {
 				out.WriteString("</ul>\n")
 				inList = false
 			}
-			out.WriteString("<h2>" + formatInline(strings.TrimPrefix(line, "## ")) + "</h2>\n")
+			id := sanitizeAnchor(strings.TrimPrefix(line, "## "))
+			out.WriteString("<h2 id=\"" + id + "\"><a href=\"#" + id + "\">" + formatInline(strings.TrimPrefix(line, "## ")) + "</a></h2>\n")
 		case strings.HasPrefix(line, "### "):
 			if inList {
 				out.WriteString("</ul>\n")
@@ -242,6 +259,7 @@ func generateIndex(posts []Post) {
 <!DOCTYPE html>
 <html>
 <head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{{.Title}}</title>
 <link rel="stylesheet" href="style.css">
 </head>
@@ -267,12 +285,13 @@ func generatePosts(posts []Post) {
 <!DOCTYPE html>
 <html>
 <head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{{.Title}}</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <nav>
-][ nobloat.org
+<a href="https://nobloat.org">][ nobloat.org</a>
 </nav>
 <article>{{.Content}}</article>
 <a href="index.html">Back to home</a>
