@@ -149,7 +149,7 @@ func parseMarkdown(input string) (content string, title string) {
 
 	formatInline := func(text string) string {
 		text = html.EscapeString(text)
-		text = imageRe.ReplaceAllString(text, `<img src="$2" alt="$1">`)
+		text = imageRe.ReplaceAllString(text, `<figure><img src="$2" alt="$1"><figcaption>$1</figcaption></figure>`)
 		text = codeRe.ReplaceAllString(text, "<code>$1</code>")
 		text = boldRe.ReplaceAllString(text, "<strong>$1</strong>")
 		text = strikeRe.ReplaceAllString(text, "<del>$1</del>")

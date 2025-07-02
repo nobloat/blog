@@ -8,16 +8,23 @@ body {
     word-wrap: break-word;
 }
 
-@media (min-width: 1280px) {
+@media (min-width: 500px) {
     body {
-        padding: 2rem 20rem;
+        padding: 2rem 5rem;
         line-height: 1.5;
     }
 }
 
-@media (min-width: 600px) {
+@media (min-width: 768px) {
     body {
-        padding: 2rem 5rem;
+        padding: 2rem 10rem;
+        line-height: 1.5;
+    }
+}
+
+@media (min-width: 1024px) {
+    body {
+        padding: 2rem 20rem;
         line-height: 1.5;
     }
 }
@@ -41,9 +48,10 @@ h1 {
 h1,
 h2,
 h3 {
+    padding-left: 0.5rem;
     font-family: monospace;
     margin-top: 1.75em;
-    box-shadow: 0 2px 0 rgba(0, 0, 0, 0.1);
+    text-shadow: 9px 6px 13px 2px rgba(0, 0, 0, 0.1);
 }
 
 ul {
@@ -54,15 +62,6 @@ ul {
 
 li {
     padding-left: 1em;
-}
-
-img {
-    justify-content: center;
-    max-width: 100%;
-    height: auto;
-    border: 2px solid light-dark(#f7f8f9, #333);
-    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
-    border-radius: 5px;
 }
 
 article {
@@ -104,4 +103,26 @@ h1,
 h2,
 h3 {
     word-break: break-word;
+}
+
+figure {
+    display: block;
+    text-align: center;
+    margin: 2em auto;
+}
+
+figure img {
+    max-width: 100%;
+    height: auto;
+    margin: 0 auto;
+    border: 2px solid light-dark(#555, #aaa);
+    box-shadow: 9px 6px 13px 2px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+}
+
+figcaption {
+    font-size: 0.75em;
+    color: light-dark(#555, #aaa);
+    margin-top: 0.5em;
+    font-style: italic;
 }
