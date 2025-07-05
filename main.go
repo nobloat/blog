@@ -27,19 +27,28 @@ type Post struct {
 }
 
 type Config struct {
-	Title   string
-	BaseURL string
-	Links   map[string]string
+	Title    string
+	BaseURL  string
+	Links    map[string]string
+	Projects map[string]string
 }
 
 var config = Config{
-	Title:   "nobloat.org",
+	Title:   "][ nobloat.org",
 	BaseURL: "https://nobloat.org",
 	Links: map[string]string{
-		"GitHub":       "https://github.com/nobloat",
-		"nobloat.org":  "https://nobloat.org",
-		"zeitkapsl.eu": "https://zeitkapsl.eu",
-		"RSS":          "./feed.xml",
+		"GitHub":               "https://github.com/nobloat",
+		"nobloat.org":          "https://nobloat.org",
+		"zeitkapsl.eu":         "https://zeitkapsl.eu",
+		"hardcode.at":          "https://hardcode.at",
+		"spiessknafl.at/peter": "https://spiessknafl.at/peter",
+		"RSS Feed":             "./feed.xml",
+	},
+	Projects: map[string]string{
+		"[nobloat/css](https://github.com/nobloat/css)":             "modular vanilla CSS3 components",
+		"[nobloat/bare-jvm](https://github.com/nobloat/bare-jvm)":   "[baremessages](https://baremessages.org/) implementation for the JVM",
+		"[cinemast/dbolve](https://github.com/cinemast/dbolve)":     "very minimalistic database migration tool for golang projects",
+		"[nobloat/tinyviper](https://github.com/nobloat/tinyviper)": "very minimalistic alternative to the famous [spf13/viper](https://github.com/spf13/viper) configuration library",
 	},
 }
 
@@ -59,7 +68,7 @@ func sanitizeAnchor(input string) string {
 }
 
 func buildSite() {
-	posts := loadPosts("content")
+	posts := loadPosts("articles")
 	os.MkdirAll("public", 0755)
 	copyStaticAssets()
 	generateIndex(posts)
@@ -88,7 +97,7 @@ func watchFiles() {
 	}
 	defer watcher.Close()
 
-	watchPaths := []string{"content", "style.css", "main.go"}
+	watchPaths := []string{"articles", "style.css", "main.go", "index.html", "article.html"}
 	for _, path := range watchPaths {
 		if err := watcher.Add(path); err != nil {
 			log.Println("watch error:", err)
@@ -103,6 +112,7 @@ func watchFiles() {
 			}
 			fmt.Println("Changed:", event.Name)
 			buildSite()
+
 		case err, ok := <-watcher.Errors:
 			if !ok {
 				return
@@ -133,29 +143,33 @@ func loadPosts(dir string) []Post {
 	return posts
 }
 
+var (
+	// Inline formatting
+	codeRe   = regexp.MustCompile("`([^`\n]+)`")
+	boldRe   = regexp.MustCompile(`\*\*(.+?)\*\*`)
+	italicRe = regexp.MustCompile(`\*(.+?)\*`)
+	strikeRe = regexp.MustCompile(`~~(.+?)~~`)
+	imageRe  = regexp.MustCompile(`!\[([^\]]*)\]\(([^)]+)\)`)
+	linkRe   = regexp.MustCompile(`\[([^\]]*)\]\(([^)]+)\)`)
+)
+
+func formatInline(text string) string {
+	text = html.EscapeString(text)
+	text = imageRe.ReplaceAllString(text, `<figure><img src="$2" alt="$1"><figcaption>$1</figcaption></figure>`)
+	text = linkRe.ReplaceAllString(text, `<a href="$2">$1</a>`)
+	text = codeRe.ReplaceAllString(text, "<code>$1</code>")
+	text = boldRe.ReplaceAllString(text, "<strong>$1</strong>")
+	text = strikeRe.ReplaceAllString(text, "<del>$1</del>")
+	text = italicRe.ReplaceAllString(text, "<em>$1</em>")
+	return text
+}
+
 func parseMarkdown(input string) (content string, title string) {
 	lines := strings.Split(input, "\n")
 	var out strings.Builder
 	inList := false
 	inCode := false
 	codeLang := ""
-
-	// Inline formatting
-	codeRe := regexp.MustCompile("`([^`\n]+)`")
-	boldRe := regexp.MustCompile(`\*\*(.+?)\*\*`)
-	italicRe := regexp.MustCompile(`\*(.+?)\*`)
-	strikeRe := regexp.MustCompile(`~~(.+?)~~`)
-	imageRe := regexp.MustCompile(`!\[([^\]]*)\]\(([^)]+)\)`)
-
-	formatInline := func(text string) string {
-		text = html.EscapeString(text)
-		text = imageRe.ReplaceAllString(text, `<figure><img src="$2" alt="$1"><figcaption>$1</figcaption></figure>`)
-		text = codeRe.ReplaceAllString(text, "<code>$1</code>")
-		text = boldRe.ReplaceAllString(text, "<strong>$1</strong>")
-		text = strikeRe.ReplaceAllString(text, "<del>$1</del>")
-		text = italicRe.ReplaceAllString(text, "<em>$1</em>")
-		return text
-	}
 
 	// First line is title
 	if len(lines) > 0 && strings.HasPrefix(lines[0], "# ") {
@@ -177,7 +191,7 @@ func parseMarkdown(input string) (content string, title string) {
 			if codeLang == "" {
 				out.WriteString("<pre><code>\n")
 			} else {
-				out.WriteString(fmt.Sprintf("<pre><code class=\"language-%s\">\n", codeLang))
+				out.WriteString(fmt.Sprintf("<pre><code class=\"language-%s\">", codeLang))
 			}
 			continue
 		}
@@ -245,58 +259,35 @@ func parseMarkdown(input string) (content string, title string) {
 }
 
 func writeIfChanged(path string, content []byte) error {
-	existing, err := os.ReadFile(path)
-	if err == nil && bytes.Equal(existing, content) {
-		fmt.Println("unchanged:", path)
-		return nil
-	}
+
 	fmt.Println("writing:", path)
 	return os.WriteFile(path, content, 0644)
 }
 
+var funcMap = template.FuncMap{
+	"md2html": formatInline,
+	"safeHTML": func(s string) template.HTML {
+		return template.HTML(s)
+	},
+}
+
 func generateIndex(posts []Post) {
-	tmpl := template.Must(template.New("index").Parse(`
-<!DOCTYPE html>
-<html>
-<head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{{.Title}}</title>
-<link rel="stylesheet" href="style.css">
-</head>
-<body>
-<h1>{{.Title}}</h1>
-<h2>Articles</h2>
-<ul>
-{{range .Posts}}<li><a href="{{.Slug}}.html">{{.Title}}</a></li>{{end}}
-</ul>
-<h2>Links</h2>
-<ul>
-{{range $name, $url := .Links}}<li><a href="{{$url}}">{{$name}}</a></li>{{end}}
-</ul>
-</body>
-</html>`))
+	tpl, err := os.ReadFile("index.html")
+	if err != nil {
+		panic(err)
+	}
+	tmpl := template.Must(template.New("index").Funcs(funcMap).Parse(string(tpl)))
 	var buf bytes.Buffer
-	tmpl.Execute(&buf, map[string]any{"Title": config.Title, "Posts": posts, "Links": config.Links})
+	tmpl.Execute(&buf, map[string]any{"Title": config.Title, "Posts": posts, "Links": config.Links, "Projects": config.Projects})
 	_ = writeIfChanged("public/index.html", buf.Bytes())
 }
 
 func generatePosts(posts []Post) {
-	tmpl := template.Must(template.New("post").Parse(`
-<!DOCTYPE html>
-<html>
-<head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{{.Title}}</title>
-<link rel="stylesheet" href="style.css">
-</head>
-<body>
-<nav>
-<a href="https://nobloat.org">][ nobloat.org</a>
-</nav>
-<article>{{.Content}}</article>
-<a href="index.html">Back to home</a>
-</body>
-</html>`))
+	tpl, err := os.ReadFile("article.html")
+	if err != nil {
+		panic(err)
+	}
+	tmpl := template.Must(template.New("post").Funcs(funcMap).Parse(string(tpl)))
 	for _, post := range posts {
 		var buf bytes.Buffer
 		tmpl.Execute(&buf, post)

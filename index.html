@@ -1,0 +1,34 @@
+<!doctype html>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>{{.Title}}</title>
+        <link rel="stylesheet" href="style.css" />
+    </head>
+    <body>
+        <h1>{{.Title}}</h1>
+        <h2 id="articles">Articles</h2>
+        <ul>
+            {{range .Posts}}
+            <li>
+                <small>{{ .Date.Format "Jan 2 2006" }}</small>
+                <a href="{{.Slug}}.html">{{.Title}}</a>
+            </li>
+            {{end}}
+        </ul>
+        <h2 id="projects">Projects</h2>
+        <ul>
+            {{range $name, $desc := .Projects}}
+            <li>
+                {{ md2html $name | safeHTML }} {{ md2html $desc | safeHTML }}
+            </li>
+            {{end}}
+        </ul>
+        <h2 id="links">Links</h2>
+        <ul>
+            {{range $name, $url := .Links}}
+            <li><a href="{{$url}}">{{$name}}</a></li>
+            {{end}}
+        </ul>
+    </body>
+</html>
