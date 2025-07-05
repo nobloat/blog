@@ -26,31 +26,19 @@ type Post struct {
 	Content template.HTML
 }
 
+type Tool struct {
+	Name        string
+	Description string
+	URL         string
+}
+
 type Config struct {
 	Title    string
 	Slogan   string
 	BaseURL  string
 	Links    map[string]string
 	Projects map[string]string
-}
-
-var config = Config{
-	Title:   "][ nobloat.org",
-	Slogan:  "pragmatic software minimalism",
-	BaseURL: "https://nobloat.org",
-	Links: map[string]string{
-		"GitHub":               "https://github.com/nobloat",
-		"nobloat.org":          "https://nobloat.org",
-		"zeitkapsl.eu":         "https://zeitkapsl.eu",
-		"hardcode.at":          "https://hardcode.at",
-		"spiessknafl.at/peter": "https://spiessknafl.at/peter",
-	},
-	Projects: map[string]string{
-		"[nobloat/css](https://github.com/nobloat/css)":             "modular vanilla CSS3 components",
-		"[nobloat/bare-jvm](https://github.com/nobloat/bare-jvm)":   "[baremessages](https://baremessages.org/) implementation for the JVM",
-		"[cinemast/dbolve](https://github.com/cinemast/dbolve)":     "very minimalistic database migration tool for golang projects",
-		"[nobloat/tinyviper](https://github.com/nobloat/tinyviper)": "very minimalistic alternative to the famous [spf13/viper](https://github.com/spf13/viper) configuration library",
-	},
+	Tools    []Tool
 }
 
 func sanitizeAnchor(input string) string {
@@ -280,7 +268,7 @@ func generateIndex(posts []Post) {
 	}
 	tmpl := template.Must(template.New("index").Funcs(funcMap).Parse(string(tpl)))
 	var buf bytes.Buffer
-	tmpl.Execute(&buf, map[string]any{"Title": config.Title, "Posts": posts, "Links": config.Links, "Projects": config.Projects, "Slogan": config.Slogan})
+	tmpl.Execute(&buf, map[string]any{"Title": config.Title, "Posts": posts, "Tools": config.Tools, "Links": config.Links, "Projects": config.Projects, "Slogan": config.Slogan})
 	_ = writeIfChanged("public/index.html", buf.Bytes())
 }
 

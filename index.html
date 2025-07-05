@@ -12,33 +12,56 @@
         />
         <title>{{.Title}}</title>
         <link rel="stylesheet" href="style.css" />
+        <script
+            defer
+            data-domain="nobloat.org"
+            src="https://plausible.io/js/script.outbound-links.tagged-events.js"
+        ></script>
     </head>
     <body>
         <h1><a href="./index.html">{{.Title}}</a></h1>
         <p style="font-family: monospace; text-align: center">{{.Slogan}}</p>
-        <h2 id="articles">Articles</h2>
-        <ul>
-            {{range .Posts}}
-            <li>
-                <small>{{ .Date.Format "Jan 2 2006" }}</small>
-                <a href="articles/{{.Slug}}.html">{{.Title}}</a>
-            </li>
-            {{end}}
-        </ul>
-        <h2 id="projects">Projects</h2>
-        <ul>
-            {{range $name, $desc := .Projects}}
-            <li>
-                {{ md2html $name | safeHTML }} {{ md2html $desc | safeHTML }}
-            </li>
-            {{end}}
-        </ul>
-        <h2 id="links">Links</h2>
-        <ul>
-            {{range $name, $url := .Links}}
-            <li><a href="{{$url}}">{{$name}}</a></li>
-            {{end}}
-        </ul>
+        <section>
+            <h2 id="articles">Articles</h2>
+            <ul>
+                {{range .Posts}}
+                <li>
+                    <small>{{ .Date.Format "Jan 2 2006" }}</small>
+                    <a href="articles/{{.Slug}}.html">{{.Title}}</a>
+                </li>
+                {{end}}
+            </ul>
+        </section>
+        <section>
+            <h2 id="projects">Projects</h2>
+            <ul>
+                {{range $name, $desc := .Projects}}
+                <li>
+                    {{ md2html $name | safeHTML }} {{ md2html $desc | safeHTML
+                    }}
+                </li>
+                {{end}}
+            </ul>
+        </section>
+        <section>
+            <h2 id="tools">Tools</h2>
+            <ul>
+                {{range $tool := .Tools}}
+                <li>
+                    <a href="{{$tool.URL}}">{{$tool.Name}}</a>
+                    {{$tool.Description}}
+                </li>
+                {{end}}
+            </ul>
+        </section>
+        <section>
+            <h2 id="links">Links</h2>
+            <ul>
+                {{range $name, $url := .Links}}
+                <li><a href="{{$url}}">{{$name}}</a></li>
+                {{end}}
+            </ul>
+        </section>
         <footer>
             <a href="./feed.xml">RSS Feed</a> |
             <a href="https://github.com/nobloat">GitHub</a>

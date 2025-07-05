@@ -1,17 +1,21 @@
-BLOG_SRC := content/*.md style.css main.go
+BLOG_SRC := articles/*.md style.css main.go
 OUTPUT_DIR := public
+DEPLOY_DIR := kadse@jedicke.uberspace.de:web/nobloat.org
 
 .PHONY: build deploy dev
 
 build: $(BLOG_SRC)
 	mkdir -p $(OUTPUT_DIR)
-	go run main.go
+	go run ./...
 
 deploy: build
-	#rsync -av --delete $(OUTPUT_DIR)/ $(DEPLOY_DIR)/
+	rsync -av --delete $(OUTPUT_DIR)/ $(DEPLOY_DIR)/
+
+test:
+
 
 dev:
-	go run main.go -watch
+	go run ./... -watch
 
 clean:
 	rm -rf $(OUTPUT_DIR)
