@@ -1,5 +1,5 @@
 :root {
-    color-scheme: light;
+    color-scheme: light dark;
 
     --c-bg-light: #dedbd2;
     --c-fg-light: #18181b;
@@ -118,6 +118,9 @@ article {
 }
 
 nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     font-family: monospace;
     font-weight: bold;
 }
@@ -169,4 +172,13 @@ figcaption {
     color: light-dark(var(--c-lo-light), var(--c-lo-dark));
     margin-top: 0.5em;
     font-style: italic;
+}
+
+footer {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    align-items: center;
+    text-align: center;
+    margin-top: 2em;
 }

@@ -28,6 +28,7 @@ type Post struct {
 
 type Config struct {
 	Title    string
+	Slogan   string
 	BaseURL  string
 	Links    map[string]string
 	Projects map[string]string
@@ -35,6 +36,7 @@ type Config struct {
 
 var config = Config{
 	Title:   "][ nobloat.org",
+	Slogan:  "pragmatic software minimalism",
 	BaseURL: "https://nobloat.org",
 	Links: map[string]string{
 		"GitHub":               "https://github.com/nobloat",
@@ -42,7 +44,6 @@ var config = Config{
 		"zeitkapsl.eu":         "https://zeitkapsl.eu",
 		"hardcode.at":          "https://hardcode.at",
 		"spiessknafl.at/peter": "https://spiessknafl.at/peter",
-		"RSS Feed":             "./feed.xml",
 	},
 	Projects: map[string]string{
 		"[nobloat/css](https://github.com/nobloat/css)":             "modular vanilla CSS3 components",
@@ -70,6 +71,7 @@ func sanitizeAnchor(input string) string {
 func buildSite() {
 	posts := loadPosts("articles")
 	os.MkdirAll("public", 0755)
+	os.MkdirAll("public/articles", 0755)
 	copyStaticAssets()
 	generateIndex(posts)
 	generatePosts(posts)
@@ -278,7 +280,7 @@ func generateIndex(posts []Post) {
 	}
 	tmpl := template.Must(template.New("index").Funcs(funcMap).Parse(string(tpl)))
 	var buf bytes.Buffer
-	tmpl.Execute(&buf, map[string]any{"Title": config.Title, "Posts": posts, "Links": config.Links, "Projects": config.Projects})
+	tmpl.Execute(&buf, map[string]any{"Title": config.Title, "Posts": posts, "Links": config.Links, "Projects": config.Projects, "Slogan": config.Slogan})
 	_ = writeIfChanged("public/index.html", buf.Bytes())
 }
 
@@ -290,8 +292,20 @@ func generatePosts(posts []Post) {
 	tmpl := template.Must(template.New("post").Funcs(funcMap).Parse(string(tpl)))
 	for _, post := range posts {
 		var buf bytes.Buffer
-		tmpl.Execute(&buf, post)
-		_ = writeIfChanged("public/"+post.Slug+".html", buf.Bytes())
+		tmpl.Execute(&buf, struct {
+			Title   string
+			Slug    string
+			Date    time.Time
+			Content template.HTML
+			Slogan  string
+		}{
+			Title:   post.Title,
+			Slug:    post.Slug,
+			Date:    post.Date,
+			Content: template.HTML(post.Content),
+			Slogan:  config.Slogan,
+		})
+		_ = writeIfChanged("public/articles/"+post.Slug+".html", buf.Bytes())
 	}
 }
 
@@ -316,7 +330,7 @@ func generateSitemap(posts []Post) {
 	var urls []URL
 	for _, post := range posts {
 		urls = append(urls, URL{
-			Loc:     config.BaseURL + "/" + post.Slug + ".html",
+			Loc:     config.BaseURL + "/articles/" + post.Slug + ".html",
 			LastMod: post.Date.Format("2006-01-02"),
 		})
 	}
@@ -339,9 +353,9 @@ func generateFeed(posts []Post) {
 	for _, post := range posts {
 		buf.WriteString("<entry>\n")
 		buf.WriteString(fmt.Sprintf("<title>%s</title>\n", post.Title))
-		buf.WriteString(fmt.Sprintf("<link href=\"%s/%s.html\"/>\n", config.BaseURL, post.Slug))
+		buf.WriteString(fmt.Sprintf("<link href=\"%s/articles/%s.html\"/>\n", config.BaseURL, post.Slug))
 		buf.WriteString(fmt.Sprintf("<updated>%s</updated>\n", post.Date.Format(time.RFC3339)))
-		buf.WriteString(fmt.Sprintf("<id>%s/%s.html</id>\n", config.BaseURL, post.Slug))
+		buf.WriteString(fmt.Sprintf("<id>%s/articles/%s.html</id>\n", config.BaseURL, post.Slug))
 		buf.WriteString("</entry>\n")
 	}
 	buf.WriteString("</feed>")

@@ -2,17 +2,26 @@
 <html>
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta
+            name="description"
+            content="nobloat focuses on pragmatic software minimalism"
+        />
+        <meta
+            name="keywords"
+            content="cuttindg down on software bloat, minimalism, software development, frameworkless, no bloat, local-first software, minimal dependencies"
+        />
         <title>{{.Title}}</title>
         <link rel="stylesheet" href="style.css" />
     </head>
     <body>
-        <h1>{{.Title}}</h1>
+        <h1><a href="./index.html">{{.Title}}</a></h1>
+        <p style="font-family: monospace; text-align: center">{{.Slogan}}</p>
         <h2 id="articles">Articles</h2>
         <ul>
             {{range .Posts}}
             <li>
                 <small>{{ .Date.Format "Jan 2 2006" }}</small>
-                <a href="{{.Slug}}.html">{{.Title}}</a>
+                <a href="articles/{{.Slug}}.html">{{.Title}}</a>
             </li>
             {{end}}
         </ul>
@@ -30,5 +39,9 @@
             <li><a href="{{$url}}">{{$name}}</a></li>
             {{end}}
         </ul>
+        <footer>
+            <a href="./feed.xml">RSS Feed</a> |
+            <a href="https://github.com/nobloat">GitHub</a>
+        </footer>
     </body>
 </html>
