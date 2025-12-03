@@ -241,8 +241,12 @@ And the best part for me personally: I don't need `node`, `npm` or similar tools
 rsync -av --delete public/ user@host:html/blog/
 ```
 
+I do have a few ideas of further topics to write about the context of *nobloat*. Taking the courage to publish this was the biggest step for me.
+
 ## References
 
 - [github.com/nobloat/blog](https://github.com/nobloat/blog)
 - [nobloat.org](https://nobloat.org)
 - [GitHub: nobloat](https://github.com/nobloat)
+
+Feeback is always welcome to [dev@spiessknafl.at](mailto:dev@spiessknafl.at)

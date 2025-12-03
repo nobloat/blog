@@ -24,6 +24,7 @@ type Post struct {
 	Slug    string
 	Date    time.Time
 	Content template.HTML
+	Excerpt string
 }
 
 type Tool struct {
@@ -71,7 +72,6 @@ func buildSite() {
 func main() {
 	watch := flag.Bool("watch", false, "Rebuild site on file changes")
 	flag.Parse()
-
 	args := flag.Args()
 	if len(args) > 0 {
 		switch args[0] {
@@ -84,11 +84,8 @@ func main() {
 			log.Fatalf("unknown command %q", args[0])
 		}
 	}
-
 	buildSite()
-
 	fmt.Printf("Built site to: %s/index.html\n", filepath.Join(os.Getenv("PWD"), "public"))
-
 	if *watch {
 		fmt.Println("Watching for changes...")
 		watchFiles()
@@ -101,14 +98,12 @@ func watchFiles() {
 		log.Fatal(err)
 	}
 	defer watcher.Close()
-
 	watchPaths := []string{"articles", "style.css", "main.go", "index.html", "article.html"}
 	for _, path := range watchPaths {
 		if err := watcher.Add(path); err != nil {
 			log.Println("watch error:", err)
 		}
 	}
-
 	for {
 		select {
 		case event, ok := <-watcher.Events:
@@ -117,7 +112,6 @@ func watchFiles() {
 			}
 			fmt.Println("Changed:", event.Name)
 			buildSite()
-
 		case err, ok := <-watcher.Errors:
 			if !ok {
 				return
@@ -134,7 +128,6 @@ func loadPosts(dir string) []Post {
 		if strings.HasSuffix(f.Name(), ".md") {
 			path := filepath.Join(dir, f.Name())
 
-			// Parse date from filename prefix (YYYY-MM-DD)
 			if len(f.Name()) < 10 {
 				log.Printf("Warning: skipping %s - filename too short, expected format: YYYY-MM-DD-title.md", f.Name())
 				continue
@@ -148,13 +141,14 @@ func loadPosts(dir string) []Post {
 			}
 
 			data, _ := os.ReadFile(path)
-			content, title := parseMarkdown(string(data))
+			content, title, excerpt := parseMarkdown(string(data))
 			slug := strings.TrimSuffix(f.Name(), ".md")
 			posts = append(posts, Post{
 				Title:   title,
 				Slug:    slug,
 				Date:    postDate,
 				Content: template.HTML(content),
+				Excerpt: excerpt,
 			})
 		}
 	}
@@ -167,7 +161,6 @@ func loadPosts(dir string) []Post {
 }
 
 var (
-	// Inline formatting
 	codeRe   = regexp.MustCompile("`([^`\n]+)`")
 	boldRe   = regexp.MustCompile(`\*\*(.+?)\*\*`)
 	italicRe = regexp.MustCompile(`\*(.+?)\*`)
@@ -187,14 +180,14 @@ func formatInline(text string) string {
 	return text
 }
 
-func parseMarkdown(input string) (content string, title string) {
+func parseMarkdown(input string) (content string, title string, excerpt string) {
 	lines := strings.Split(input, "\n")
-	var out strings.Builder
+	var out, exc strings.Builder
 	inList := false
 	inCode := false
 	codeLang := ""
+	firstParagraphCaptured := false
 
-	// First line is title
 	if len(lines) > 0 && strings.HasPrefix(lines[0], "# ") {
 		title = strings.TrimPrefix(lines[0], "# ")
 	}
@@ -202,7 +195,6 @@ func parseMarkdown(input string) (content string, title string) {
 	for _, raw := range lines {
 		line := strings.TrimSpace(raw)
 
-		// Handle code block start/end
 		if strings.HasPrefix(line, "```") {
 			if inCode {
 				out.WriteString("</code></pre>\n</div>\n")
@@ -219,13 +211,10 @@ func parseMarkdown(input string) (content string, title string) {
 			}
 			continue
 		}
-
 		if inCode {
 			out.WriteString(html.EscapeString(raw) + "\n")
 			continue
 		}
-
-		// End list if needed
 		if inList && line == "" {
 			out.WriteString("</ul>\n")
 			inList = false
@@ -274,22 +263,24 @@ func parseMarkdown(input string) (content string, title string) {
 				out.WriteString("</ul>\n")
 				inList = false
 			}
-			out.WriteString("<p>" + formatInline(line) + "</p>\n")
+			paragraph := formatInline(line)
+			out.WriteString("<p>" + paragraph + "</p>\n")
+			if !firstParagraphCaptured {
+				exc.WriteString(paragraph)
+				firstParagraphCaptured = true
+			}
 		}
 	}
-
 	if inList {
 		out.WriteString("</ul>\n")
 	}
 	if inCode {
 		out.WriteString("</code></pre>\n</div>\n")
 	}
-
-	return out.String(), title
+	return out.String(), title, exc.String()
 }
 
 func writeIfChanged(path string, content []byte) error {
-
 	fmt.Println("writing:", path)
 	return os.WriteFile(path, content, 0644)
 }
@@ -342,7 +333,6 @@ func copyStaticAssets() {
 	if err == nil {
 		_ = writeIfChanged("public/style.css", input)
 	}
-
 }
 
 func generateSitemap(posts []Post) {
@@ -377,13 +367,26 @@ func generateFeed(posts []Post) {
 `)
 	buf.WriteString(fmt.Sprintf("<title>%s</title>\n", config.Title))
 	buf.WriteString(fmt.Sprintf("<link href=\"%s/feed.xml\" rel=\"self\" />\n", config.BaseURL))
+	buf.WriteString(fmt.Sprintf("<link href=\"%s\" />\n", config.BaseURL))
+	buf.WriteString(fmt.Sprintf("<id>%s/</id>\n", config.BaseURL))
 	buf.WriteString(fmt.Sprintf("<updated>%s</updated>\n", time.Now().Format(time.RFC3339)))
+	buf.WriteString("<author>\n")
+	buf.WriteString(fmt.Sprintf("  <name>%s</name>\n", config.Title))
+	buf.WriteString(fmt.Sprintf("  <uri>%s</uri>\n", config.BaseURL))
+	buf.WriteString("</author>\n")
 	for _, post := range posts {
 		buf.WriteString("<entry>\n")
 		buf.WriteString(fmt.Sprintf("<title>%s</title>\n", post.Title))
 		buf.WriteString(fmt.Sprintf("<link href=\"%s/articles/%s.html\"/>\n", config.BaseURL, post.Slug))
 		buf.WriteString(fmt.Sprintf("<updated>%s</updated>\n", post.Date.Format(time.RFC3339)))
 		buf.WriteString(fmt.Sprintf("<id>%s/articles/%s.html</id>\n", config.BaseURL, post.Slug))
+		buf.WriteString("<author>\n")
+		buf.WriteString(fmt.Sprintf("  <name>%s</name>\n", config.Title))
+		buf.WriteString(fmt.Sprintf("  <uri>%s</uri>\n", config.BaseURL))
+		buf.WriteString("</author>\n")
+		buf.WriteString("<content type=\"html\">")
+		buf.WriteString(html.EscapeString(post.Excerpt))
+		buf.WriteString("</content>\n")
 		buf.WriteString("</entry>\n")
 	}
 	buf.WriteString("</feed>")
