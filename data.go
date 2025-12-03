@@ -5,7 +5,7 @@ var config = Config{
 	Slogan:  "pragmatic software minimalism",
 	BaseURL: "https://nobloat.org",
 	Links: map[string]string{
-		"Choosing borinng technology":                        "https://boringtechnology.club/",
+		"Choosing boring technology":                         "https://boringtechnology.club/",
 		"Radical simplicity":                                 "https://www.radicalsimpli.city/",
 		"Frameworkless movement":                             "https://frameworklessmovement.org/",
 		"No frameworks Part II - Matteo Vaccari":             "http://matteo.vaccari.name/blog/archives/1022",

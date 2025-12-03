@@ -2,25 +2,15 @@
 <html>
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta
-            name="description"
-            content="nobloat focuses on pragmatic software minimalism"
-        />
-        <meta
-            name="keywords"
-            content="cuttindg down on software bloat, minimalism, software development, frameworkless, no bloat, local-first software, minimal dependencies"
-        />
+        <meta name="description" content="nobloat focuses on pragmatic software minimalism" />
+        <meta name="keywords" content="cuttindg down on software bloat, minimalism, software development, frameworkless, no bloat, local-first software, minimal dependencies" />
         <title>{{.Title}}</title>
         <link rel="stylesheet" href="style.css" />
-        <script
-            defer
-            data-domain="nobloat.org"
-            src="https://plausible.io/js/script.outbound-links.tagged-events.js"
-        ></script>
+        <script defer data-domain="nobloat.org" src="https://plausible.io/js/script.outbound-links.tagged-events.js"></script>
     </head>
     <body>
         <h1><a href="./index.html">{{.Title}}</a></h1>
-        <p style="font-family: monospace; text-align: center">{{.Slogan}}</p>
+        <p style="font-family: monospace; text-align: right">{{.Slogan}}</p>
         <section>
             <h2 id="articles">Articles</h2>
             <ul>
@@ -36,10 +26,7 @@
             <h2 id="projects">Projects</h2>
             <ul>
                 {{range $name, $desc := .Projects}}
-                <li>
-                    {{ md2html $name | safeHTML }} {{ md2html $desc | safeHTML
-                    }}
-                </li>
+                <li>{{ md2html $name | safeHTML }} {{ md2html $desc | safeHTML }}</li>
                 {{end}}
             </ul>
         </section>

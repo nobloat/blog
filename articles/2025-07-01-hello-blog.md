@@ -152,7 +152,7 @@ It might not be suitable for someone who needs complex features like tags, categ
 
 The entire codebase is very small, making it easy to read, modify, and maintain.
 
-## Links / References
+## References
 
 - [github.com/nobloat/blog](https://github.com/nobloat/blog)
 - [nobloat.org](https://nobloat.org)
