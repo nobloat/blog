@@ -82,6 +82,7 @@ h2 > a:hover::before {
 
 a:hover {
     filter: brightness(1.3);
+    text-decoration: underline;
 }
 
 h1 {
@@ -164,6 +165,14 @@ pre {
 code {
     font-family: monospace;
     white-space: pre-wrap;
+}
+
+blockquote {
+    border-left: 3px solid light-dark(var(--c-lo-light), var(--c-lo-dark));
+    padding-left: 1rem;
+    margin: 1.5rem 0;
+    color: light-dark(var(--c-lo-light), var(--c-lo-dark));
+    font-style: italic;
 }
 
 html,

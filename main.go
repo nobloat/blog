@@ -1,4 +1,3 @@
-// main.go
 package main
 
 import (
@@ -221,6 +220,12 @@ func parseMarkdown(input string) (content string, title string) {
 		}
 
 		switch {
+		case strings.HasPrefix(line, "> "):
+			if inList {
+				out.WriteString("</ul>\n")
+				inList = false
+			}
+			out.WriteString("<blockquote><p>" + formatInline(strings.TrimPrefix(line, "> ")) + "</p></blockquote>\n")
 		case strings.HasPrefix(line, "# "):
 			if inList {
 				out.WriteString("</ul>\n")
