@@ -35,6 +35,9 @@ What I needed was:
 
 None of the existing solutions met these requirements. They either required complex setup, had too many dependencies, introduced unnecessary abstractions, or were too opinionated about structure. Plus this might be a fun project for a sunny afternoon in the park. 
 
+![Image of me in the park reading the refactoring english book](../images/reading-in-prater.png)
+
+
 The implementation consists of two Go files: `main.go` (core functionality) and `data.go` (site configuration), with no external dependencies beyond the standard library. It reads Markdown files, converts them to HTML, generates an index page, creates an RSS feed, and outputs everything to a `public/` directory. The entire codebase is **under 400 lines** and does exactly what I need, nothing more.
 
 ## How it works
@@ -148,9 +151,10 @@ This is the only external dependency ([github.com/fsnotify/fsnotify](https://git
 
 This blog generator does exactly what I need: converts Markdown to HTML, generates an index and RSS feed, and outputs static files. **It's under 400 lines of code**, uses only the go standard library for core functionality, and I understand every part of it.
 
-It might not be suitable for someone who needs complex features like tags, categories, pagination, or theme systems. But for a simple technical blog, it's perfect. It fits the *"nobloat" philosophy*.
+It might not be suitable for someone who needs complex features like tags, categories, pagination, or theme systems. But for a simple blog, it's perfect. It fits the *"nobloat" philosophy*.
 
 The entire codebase is very small, making it easy to read, modify, and maintain.
+And the best part for me personally: I don't need `node`, `npm` or similar tools to build this. Local preview is just opening the `public/index.html` in `firefox`. Deployment is just an `rsync -av --delete public/ user@host:html/blog/`
 
 ## References
 

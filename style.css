@@ -205,18 +205,19 @@ figure {
     margin: 2em auto;
 }
 
-figure img {
-    max-width: 100%;
+figure img,
+figure svg {
+    width: 80%;
     height: auto;
+    display: block;
     margin: 0 auto;
     border: 2px solid light-dark(var(--c-lo-light), var(--c-lo-dark));
     box-shadow: 5px light-dark(var(--c-lo-light), var(--c-lo-dark));
     border-radius: var(--radius);
-    /*filter: grayscale(1);*/
 }
 
 figcaption {
-    font-size: 0.75em;
+    font-size: 0.9em;
     color: light-dark(var(--c-lo-light), var(--c-lo-dark));
     margin-top: 0.5em;
     font-style: italic;

@@ -1,2 +1,6 @@
-public/*
+
 .DS_Store
+public/articles/**
+public/*.xml
+public/*.html
+public/*.css

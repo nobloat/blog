@@ -11,9 +11,9 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strings"
 	"time"
-	"sort"
 	"unicode"
 
 	"github.com/fsnotify/fsnotify"
@@ -72,6 +72,19 @@ func main() {
 	watch := flag.Bool("watch", false, "Rebuild site on file changes")
 	flag.Parse()
 
+	args := flag.Args()
+	if len(args) > 0 {
+		switch args[0] {
+		case "image":
+			runImageCommand(args[1:])
+			return
+		case "build":
+			args = args[1:]
+		default:
+			log.Fatalf("unknown command %q", args[0])
+		}
+	}
+
 	buildSite()
 
 	fmt.Printf("Built site to: %s/index.html\n", filepath.Join(os.Getenv("PWD"), "public"))
@@ -126,7 +139,7 @@ func loadPosts(dir string) []Post {
 				log.Printf("Warning: skipping %s - filename too short, expected format: YYYY-MM-DD-title.md", f.Name())
 				continue
 			}
-			
+
 			dateStr := f.Name()[:10]
 			postDate, err := time.Parse("2006-01-02", dateStr)
 			if err != nil {
