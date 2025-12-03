@@ -8,12 +8,13 @@ import (
 	"log"
 	"math"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 )
 
 const (
-	maxLongEdge     = 500
+	maxLongEdge     = 400
 	unsharpSigma    = 1.5
 	unsharpAmount   = 1.5
 	sigmoidContrast = 5.0
@@ -29,13 +30,7 @@ func runImageCommand(args []string) {
 	}
 
 	in := args[0]
-	var out string
-	if len(args) >= 2 {
-		out = args[1]
-	} else {
-		ext := filepath.Ext(in)
-		out = strings.TrimSuffix(in, ext) + "_gray.png"
-	}
+	out := path.Join("public", "images", strings.TrimSuffix(filepath.Base(in), filepath.Ext(in))+".png")
 
 	inStat, err := os.Stat(in)
 	if err != nil {

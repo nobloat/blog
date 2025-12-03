@@ -207,10 +207,11 @@ figure {
 
 figure img,
 figure svg {
-    width: 80%;
+    max-width: 75%;
     height: auto;
     display: block;
     margin: 0 auto;
+    max-height: 400px;
     border: 2px solid light-dark(var(--c-lo-light), var(--c-lo-dark));
     box-shadow: 5px light-dark(var(--c-lo-light), var(--c-lo-dark));
     border-radius: var(--radius);
