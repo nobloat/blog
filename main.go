@@ -14,6 +14,7 @@ import (
 	"regexp"
 	"strings"
 	"time"
+	"sort"
 	"unicode"
 
 	"github.com/fsnotify/fsnotify"
@@ -74,6 +75,8 @@ func main() {
 
 	buildSite()
 
+	fmt.Printf("Built site to: %s/index.html\n", filepath.Join(os.Getenv("PWD"), "public"))
+
 	if *watch {
 		fmt.Println("Watching for changes...")
 		watchFiles()
@@ -118,18 +121,36 @@ func loadPosts(dir string) []Post {
 	for _, f := range files {
 		if strings.HasSuffix(f.Name(), ".md") {
 			path := filepath.Join(dir, f.Name())
-			stat, _ := os.Stat(path)
+
+			// Parse date from filename prefix (YYYY-MM-DD)
+			if len(f.Name()) < 10 {
+				log.Printf("Warning: skipping %s - filename too short, expected format: YYYY-MM-DD-title.md", f.Name())
+				continue
+			}
+			
+			dateStr := f.Name()[:10]
+			postDate, err := time.Parse("2006-01-02", dateStr)
+			if err != nil {
+				log.Printf("Warning: skipping %s - invalid date format in filename prefix, expected YYYY-MM-DD, got: %s", f.Name(), dateStr)
+				continue
+			}
+
 			data, _ := os.ReadFile(path)
 			content, title := parseMarkdown(string(data))
 			slug := strings.TrimSuffix(f.Name(), ".md")
 			posts = append(posts, Post{
 				Title:   title,
 				Slug:    slug,
-				Date:    stat.ModTime(),
+				Date:    postDate,
 				Content: template.HTML(content),
 			})
 		}
 	}
+
+	sort.Slice(posts, func(i, j int) bool {
+		return posts[i].Date.After(posts[j].Date)
+	})
+
 	return posts
 }
 
@@ -172,14 +193,15 @@ func parseMarkdown(input string) (content string, title string) {
 		// Handle code block start/end
 		if strings.HasPrefix(line, "```") {
 			if inCode {
-				out.WriteString("</code></pre>\n")
+				out.WriteString("</code></pre>\n</div>\n")
 				inCode = false
 				continue
 			}
 			inCode = true
 			codeLang = strings.TrimSpace(strings.TrimPrefix(line, "```"))
+			out.WriteString("<div class=\"code-block-wrapper\">\n<button class=\"copy-button\" onclick=\"copyCode(this)\" aria-label=\"Copy code\">Copy</button>\n")
 			if codeLang == "" {
-				out.WriteString("<pre><code>\n")
+				out.WriteString("<pre><code>")
 			} else {
 				out.WriteString(fmt.Sprintf("<pre><code class=\"language-%s\">", codeLang))
 			}
@@ -242,7 +264,7 @@ func parseMarkdown(input string) (content string, title string) {
 		out.WriteString("</ul>\n")
 	}
 	if inCode {
-		out.WriteString("</code></pre>\n")
+		out.WriteString("</code></pre>\n</div>\n")
 	}
 
 	return out.String(), title

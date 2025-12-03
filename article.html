@@ -10,6 +10,25 @@
             data-domain="nobloat.org"
             src="https://plausible.io/js/script.outbound-links.tagged-events.js"
         ></script>
+        <script>
+            function copyCode(button) {
+                const codeBlock = button.nextElementSibling;
+                const code = codeBlock.querySelector('code');
+                const text = code.textContent;
+                navigator.clipboard.writeText(text).then(() => {
+                    const originalText = button.textContent;
+                    button.textContent = 'Copied!';
+                    setTimeout(() => {
+                        button.textContent = originalText;
+                    }, 2000);
+                }).catch(() => {
+                    button.textContent = 'Failed';
+                    setTimeout(() => {
+                        button.textContent = 'Copy';
+                    }, 2000);
+                });
+            }
+        </script>
     </head>
     <body>
         <nav>
@@ -18,8 +37,8 @@
         </nav>
         <article>{{.Content}}</article>
         <footer>
-            <a href="index.html">Back to home</a> |
-            <a href="./feed.xml">RSS Feed</a> |
+            <a href="../index.html">Back to home</a> |
+            <a href="../feed.xml">RSS Feed</a> |
             <a href="https://github.com/nobloat">GitHub</a>
         </footer>
     </body>
