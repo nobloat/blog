@@ -142,6 +142,7 @@ pre {
     border-radius: var(--radius);
     padding: 1rem;
     margin: 0;
+    overflow-x: auto;
 }
 
 .copy-button {
@@ -170,7 +171,6 @@ pre {
 
 code {
     font-family: monospace;
-    white-space: pre-wrap;
 }
 
 blockquote {
