@@ -15,8 +15,6 @@ import (
 	"strings"
 	"time"
 	"unicode"
-
-	"github.com/fsnotify/fsnotify"
 )
 
 type Post struct {
@@ -89,35 +87,6 @@ func main() {
 	if *watch {
 		fmt.Println("Watching for changes...")
 		watchFiles()
-	}
-}
-
-func watchFiles() {
-	watcher, err := fsnotify.NewWatcher()
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer watcher.Close()
-	watchPaths := []string{"articles", "style.css", "main.go", "index.html", "article.html"}
-	for _, path := range watchPaths {
-		if err := watcher.Add(path); err != nil {
-			log.Println("watch error:", err)
-		}
-	}
-	for {
-		select {
-		case event, ok := <-watcher.Events:
-			if !ok {
-				return
-			}
-			fmt.Println("Changed:", event.Name)
-			buildSite()
-		case err, ok := <-watcher.Errors:
-			if !ok {
-				return
-			}
-			log.Println("watch error:", err)
-		}
 	}
 }
 

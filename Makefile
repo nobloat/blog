@@ -12,19 +12,9 @@ build: $(BLOG_SRC)
 deploy: build
 	rsync -av --delete $(OUTPUT_DIR)/ $(DEPLOY_DIR)/
 
-test:
-
 
 dev:
-	go run ./... -watch
+	go run -tags watch ./... -watch
 
 clean:
 	rm -rf $(OUTPUT_DIR)
-
-convert:
-	@if [ -z "$(file)" ]; then \
-		echo "Usage: make convert file=path/to/image.jpg [out=name.png]"; \
-		exit 1; \
-	fi
-	mkdir -p $(IMAGES_DIR)
-	go run ./... image "$(file)" "$(or $(out),$(IMAGES_DIR)/$(notdir $(basename $(file)))_gray.png)"

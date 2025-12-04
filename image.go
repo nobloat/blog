@@ -1,3 +1,5 @@
+//go:build image
+
 package main
 
 import (
