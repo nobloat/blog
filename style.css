@@ -137,6 +137,12 @@ nav {
     margin: 2rem;
 }
 
+@media (max-width: 640px) {
+    .code-block-wrapper {
+        margin: 1.5rem 0;
+    }
+}
+
 pre {
     border: 2px solid light-dark(var(--c-lo-light), var(--c-lo-dark));
     border-radius: var(--radius);
