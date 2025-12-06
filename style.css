@@ -67,10 +67,14 @@ small {
 
 a {
     color: light-dark(var(--c-hi-light), var(--c-hi-dark));
-    text-decoration: none;
+    text-decoration: underline;
     font-weight: bold;
     font-family: monospace;
     transition: color 0.2s ease;
+}
+
+h1 > a {
+    text-decoration: none;
 }
 
 h2 > a::before {
@@ -180,8 +184,7 @@ code {
 }
 
 blockquote {
-    border-left: 4px solid
-        light-dark(var(--c-lo-light), rgba(222, 219, 210, 0.6));
+    border-left: 4px solid light-dark(var(--c-lo-light), rgba(222, 219, 210, 0.6));
     padding: 1rem 1.5rem;
     margin: 1.5rem 0;
     color: light-dark(var(--c-lo-light), var(--c-bg-light));
