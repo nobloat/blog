@@ -1,6 +1,14 @@
 # ][✓ nobloat/poll
 
-So, I wanted to send out a poll for our yearly "zeitkapsl Punsch" event, were we invite people who helped [zeitkapsl](https://zeitkapsl.eu) becoming what it is todady. Early customers, former development team members, etc.
+So, I wanted to send out a poll for our yearly "zeitkapsl Punsch" event, were we invite people who helped [zeitkapsl](https://zeitkapsl.eu) becoming what it is todady. Early customers, former development team members, etc. Well...
+
+> "... I opened up doodle, trying to create a new poll for an event. I was immediately greeted with flashing popups stating you have to upgrade to pro now. Turns out you are now allowed to have only one event, even if that is already closed. I kept searching for where to delete the existing polls. It was not easy. I finally figured it out and was able to create the poll for my punsch event. But it left me wondering, how is everybody else tolerating this."
+
+## TL;DR
+
+[nobloat/poll](https://github.com/nobloat/poll) is a self-hostable Doodle alternative using plain `Go+std-lib`: no database, job queue, npm or node. It works without signups. Every poll is a single JSON file, the whole thing ships as one 3.5 MB binary, and a page loads ~26 KB instead of 4.7 MB. You can use it at [poll.nobloat.org](https://poll.nobloat.org). There is no "pro version" of it.
+
+## There was doodle
 
 Usually I used Doodle for that, but apparently a lot has happened there over the past year, and the path to enshi***ation has proceeded a lot further:
 
@@ -15,6 +23,7 @@ There is of course [nuudel](https://nuudel.digitalcourage.de/) and a couple othe
 ![My cabinet "server", a ThinkPad X260](../images/thinkpad-x260.png)
 
 Since the last time I did something *nobloat-style* has been over a year ago, I thought this i the perfect opportunity to spend some hours and build something I personally **enjoy building and using**.
+
 
 ## My requirements checklist
 
@@ -270,9 +279,11 @@ poll (upx)       32 ms     14.7 MB
 
 ## Summary
 
-This was fun to build, even though it turned out to be not as minimal as I hoped for. 
+It is now sunday afternoon, 14:00 and this was fun to build, even though it turned out to be not as minimal as I hoped for. But I do like that it doesnt use any external dependencies except for the SMTP gateway to send out emails, and even these are optional.
 
-**I have now a poll tool I enjoy using.**
+
+**I have now a poll tool I enjoy using.** - mission accomplished.
+
 
 I could still leave out the JavaScript stuff itself, but I like it for the shortcuts and interactivity improvements it delivers. 
 
