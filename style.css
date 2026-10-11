@@ -259,6 +259,11 @@ figure svg {
     border-radius: var(--radius);
 }
 
+figure img[src*="screenshot-"] {
+    max-width: 100%;
+    max-height: none;
+}
+
 figcaption {
     font-size: 0.9em;
     color: light-dark(var(--c-lo-light), var(--c-lo-dark));

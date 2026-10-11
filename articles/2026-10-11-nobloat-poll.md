@@ -99,18 +99,17 @@ All mails are localized, just like the web interface. The language is remembered
 
 You can create a new poll [here](https://poll.nobloat.org/new?lang=en)
 
-![The poll creation form](../images/poll-new.png)
+![The poll creation form](../images/screenshot-poll-new.png)
 
 It asks you to enter a title and a description.
 Options are simply a `<textarea>` where each line represents an option.
 You can also switch between *single choice* and *multiple choice*.
 For better privacy among voters, you can also choose whether participants can see each other's answers.
-To avoid having complex different poll types, I decided to have just one form but make it a bit smarter in case options are a date.
-Lines like `2026-10-12`, `12.10.2026`, `12.10.` (year is inferred) or `12.10.2026, 18:00–22:00` are recognized as dates, optionally with a time range. When the poll is closed and the chosen option is a date, the outcome mail sent to everybody comes with an `.ics` file attached, containing the selected date/time and the event description. This way, choosing a date or choosing a pizza together works the same way. It also allows for easy bulk creation of options since you can just copy/paste them in.
+There is no separate "event" poll type. If an option looks like a date, the poll becomes an event poll by itself (more on that [below](#calendar-invites)). Since options are just lines of text, you can also copy and paste a whole list of them in one go.
 
 ## Answering a poll
 
-![Editing an answer via the personal link](../images/poll-answer.png)
+![Editing an answer via the personal link](../images/screenshot-poll-answer.png)
 
 If the poll creator supplied an e-mail address, they receive an update mail when answers are coming in.
 
@@ -131,6 +130,40 @@ New answer from Grace: Pizza Friday
 http://localhost:8737/p/pizza-friday/m/ASEIRUQD7POJBVG6VITTHGCIIK
 ```
 
+## Calendar invites
+
+Most of my polls are really about finding a date. So when an option looks like a date, the poll treats it as one. All of these work:
+
+```
+2026-12-12
+12.12.2026
+12.12.
+Sat, 12.12.2026, 18:00–22:00
+12.12. um 18:00 Uhr
+```
+
+A missing year means the next time that date comes up. A date without a time becomes an all-day event, and a start time without an end time gets one hour. If the end time is earlier than the start, the event runs past midnight. Anything that isn't a valid date, like `31.02.`, simply stays a normal text option.
+
+When the poll is closed and the winning option is a date, everybody who left an e-mail address gets the result with an `invite.ics` attached:
+
+```
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//nobloat//poll//EN
+METHOD:PUBLISH
+BEGIN:VEVENT
+UID:zeitkapsl-punsch@poll.nobloat.org
+DTSTAMP:20261205T091500Z
+DTSTART:20261212T170000Z
+DTEND:20261212T210000Z
+SUMMARY:zeitkapsl Punsch
+DESCRIPTION:Punsch\, Kekse and old stories.
+END:VEVENT
+END:VCALENDAR
+```
+
+One click and it's in their calendar. The whole format is about 40 lines of Go: escaping, folding lines at 75 bytes, and joining them with `\r\n`. There's no need for a library.
+
 
 ## Keyboard shortcuts
 
@@ -142,7 +175,73 @@ Under the hood, it's just a `data-key` attribute in the HTML templates and a sin
 
 Since anybody can create polls on [poll.nobloat.org](https://poll.nobloat.org), I needed some basic protection against bots, but without captchas or third-party services.
 
-Before a form is submitted, the browser fetches a challenge from `/pow`. The challenge contains a timestamp and a random value, signed with an HMAC, so the server doesn't need to store it. The browser then brute-forces a nonce until the SHA-256 hash of challenge + nonce starts with 16 zero bits, using the built-in `crypto.subtle.digest`. That's roughly 65,000 hashes, done in well under a second on a normal device. The server verifies the result with a single hash, rejects challenges older than 2 hours, and remembers used ones so they can't be replayed.
+Before the server accepts a form, the browser has to burn a bit of CPU. For one human submitting one poll, that's unnoticeable. For a bot submitting thousands, it adds up.
+
+**1. Get a challenge.** On submit, the browser fetches `GET /pow`. The server answers with the difficulty and a challenge:
+
+```
+16 1760180000.K3J5ZQ7XW2M4N6P8R2T4V6X8YA.9f2c…e41a
+```
+
+The challenge is a timestamp, a random value and an HMAC over both, signed with a key that only lives in memory. Because of the signature, the server doesn't have to store issued challenges. It can recognize its own later.
+
+**2. Solve it.** The browser counts up a number (the nonce) until `SHA-256(challenge + nonce)` starts with 16 zero bits:
+
+```javascript
+const zeroBits = (buf) => {
+  const b = new Uint8Array(buf);
+  let n = 0;
+  for (const x of b) {
+    if (x === 0) { n += 8; continue; }
+    return n + Math.clz32(x) - 24;
+  }
+  return n;
+};
+
+async function solve(challenge, bits) {
+  const enc = new TextEncoder();
+  const batch = 64;
+  for (let n = 0; ; n += batch) {
+    const hashes = await Promise.all(Array.from({ length: batch },
+      (_, i) => crypto.subtle.digest('SHA-256', enc.encode(challenge + (n + i)))));
+    const i = hashes.findIndex((h) => zeroBits(h) >= bits);
+    if (i >= 0) return String(n + i);
+  }
+}
+```
+
+Each extra zero bit halves the chance that a random hash qualifies, so 16 bits means about 2¹⁶ ≈ 65,000 tries on average. `crypto.subtle.digest` is built into every browser, so no library is needed. It's async, which is why the hashes are computed in batches of 64 with `Promise.all` rather than awaited one by one.
+
+**3. Submit with proof.** A global `submit` listener holds the form back, solves the challenge and adds both values as hidden fields before sending it off:
+
+```javascript
+async function proof() {
+  const [bits, pow] = (await (await fetch('/pow')).text()).split(' ');
+  return { pow, nonce: await solve(pow, +bits) };
+}
+
+document.addEventListener('submit', async (e) => {
+  const form = e.target;
+  if (form.method !== 'post') return;
+  if (form.dataset.proved) { delete form.dataset.proved; return; }
+  e.preventDefault();
+  // …
+  const p = await proof();
+  for (const k in p) form.insertAdjacentHTML('beforeend', `<input type="hidden" name="${k}" value="${p[k]}" data-pow>`);
+  form.dataset.proved = 1;
+  // …
+  form.requestSubmit(e.submitter);
+});
+```
+
+The forms themselves are plain HTML forms. They don't know anything about this.
+
+**4. Verify.** Every `POST` on the server goes through a middleware that checks the proof. Verifying costs a single hash, compared to the client's ~65,000:
+
+- Does the HMAC match? Otherwise the challenge is forged.
+- Is it younger than 2 hours?
+- Does `SHA-256(challenge + nonce)` really start with 16 zero bits?
+- Has this challenge been used before? Used challenges are kept in memory until they expire, so a solved one can't be replayed.
 
 This won't stop a determined attacker, but it makes mass submissions expensive enough that dumb bots move on.
 
@@ -231,8 +330,6 @@ Configuration is done via environment variables only, which works the same way i
 
 9.1 MB is not as tiny for a poll tool as I hoped for, so I looked at which packages take up the space.
 
-Stripped binaries have no symbols, so this needs a build without `-s -w`. `go tool nm -size` lists every symbol with its size, and a bit of `awk` sums them up per package (skipping `B`/`b` symbols, which are zero-initialized memory and take up no space in the file):
-
 ```
 CGO_ENABLED=0 go build -tags timetzdata,nethttpomithttp2 -trimpath -o poll-sym .
 go tool nm -size poll-sym \
@@ -254,9 +351,9 @@ html/template, text/template     0.2 MB
 nobloat/poll                     0.1 MB
 ```
 
-That only adds up to about 4 MB of the 9.1 MB. The rest is mostly `.gopclntab` (~3.1 MB, the table that maps machine code back to functions and line numbers). Go keeps it even in stripped binaries, because the runtime needs it for stack traces, panics and the garbage collector. `readelf -SW poll` shows the section sizes.
+Most of this is expected, we need the whole `crypto` package for the TLS stack for SMTP via `STARTTLS`. 
 
-Comparing builds with and without the build tags:
+There is an option to omit the HTTP/2 support, which we don't need because we run behind a reverse proxy anway.
 
 ```
 for tags in timetzdata,nethttpomithttp2 nethttpomithttp2 timetzdata; do
@@ -269,6 +366,7 @@ du -cb static templates i18n mail | tail -1
 - `timetzdata` adds **~400 KB**: the zipped time zone database
 - `nethttpomithttp2` saves **~410 KB**: the HTTP/2 implementation
 - All embedded templates, CSS, JS and translations together are only **~78 KB**
+
 
 ### Squeezing it with UPX
 
