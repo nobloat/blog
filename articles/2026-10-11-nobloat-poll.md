@@ -6,7 +6,7 @@ So, I wanted to send out a poll for our yearly "zeitkapsl Punsch" event, were we
 
 ## TL;DR
 
-[nobloat/poll](https://github.com/nobloat/poll) is a self-hostable Doodle alternative using plain `Go+std-lib`: no database, job queue, npm or node. It works without signups. Every poll is a single JSON file, the whole thing ships as one 3.5 MB binary, and a page loads ~26 KB instead of 4.7 MB. You can use it at [poll.nobloat.org](https://poll.nobloat.org). There is no "pro version" of it.
+[nobloat/poll](https://github.com/nobloat/poll) is a self-hostable single binary Doodle alternative written in plain `go` with [no further dependencies](https://github.com/nobloat/poll/blob/main/go.mod). It doesnt require a database, job queue, npm or node. It works without signups. Every poll is a single JSON file, the whole thing ships as one 3.5 MB binary, and a page loads ~27 KB (6.9 kB + 20 kB uncompressed JavaScript and CSS). You can use it at [poll.nobloat.org](https://poll.nobloat.org). There is no "pro version" of it.
 
 ## There was doodle
 
