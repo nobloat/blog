@@ -1,28 +1,28 @@
 # ][✓ nobloat/poll
 
-So, I wanted to send out a poll for our yearly "zeitkapsl Punsch" event, were we invite people who helped [zeitkapsl](https://zeitkapsl.eu) becoming what it is todady. Early customers, former development team members, etc. Well...
+So, I wanted to send out a poll for our yearly "zeitkapsl Punsch" event, where we invite people who helped [zeitkapsl](https://zeitkapsl.eu) become what it is today. Early customers, former development team members, etc. Well...
 
-> "... I opened up doodle, trying to create a new poll for an event. I was immediately greeted with flashing popups stating you have to upgrade to pro now. Turns out you are now allowed to have only one event, even if that is already closed. I kept searching for where to delete the existing polls. It was not easy. I finally figured it out and was able to create the poll for my punsch event. But it left me wondering, how is everybody else tolerating this."
+> "... I opened up Doodle, trying to create a new poll for an event. I was immediately greeted with flashing popups stating I have to upgrade to pro now. I kept searching for where to delete my existing polls. It was not easy. I finally figured it out and was able to create the poll for my punsch event. But it left me wondering: how is everybody else tolerating this?"
 
 ## TL;DR
 
-[nobloat/poll](https://github.com/nobloat/poll) is a self-hostable single binary Doodle alternative written in plain `go` with [no further dependencies](https://github.com/nobloat/poll/blob/main/go.mod). It doesnt require a database, job queue, npm or node. It works without signups. Every poll is a single JSON file, the whole thing ships as one 3.5 MB binary, and a page loads ~27 KB (6.9 kB + 20 kB uncompressed JavaScript and CSS). You can use it at [poll.nobloat.org](https://poll.nobloat.org). There is no "pro version" of it.
+[nobloat/poll](https://github.com/nobloat/poll) is a self-hostable single-binary Doodle alternative written in plain `go` with [no further dependencies](https://github.com/nobloat/poll/blob/main/go.mod). It doesn't require a database, job queue, npm or node. It works without signups. Every poll is a single JSON file, the whole thing ships as one 3.5 MB binary, and a page loads ~27 KB (6.9 kB + 20 kB uncompressed JavaScript and CSS). You can use it at [poll.nobloat.org](https://poll.nobloat.org). There is no "pro version" of it.
 
-## There was doodle
+## There was Doodle
 
-Usually I used Doodle for that, but apparently a lot has happened there over the past year, and the path to enshi***ation has proceeded a lot further:
+I usually used Doodle for that, but apparently a lot has happened there over the past year, and the path to enshi***ation has proceeded a lot further:
 
 - You have to leave your e-mail address even as a participant.
-- You can no longer have more than one poll in total in the "free account".
+- You can no longer have more than one poll in total in the "free account", even if the old one is already closed.
 - You can't export your participant list.
 - Loading the poll page takes around 3 seconds, and downloads 4.7 MB JavaScript.
 - You are flashed by so many pop-ups.
 
-There is of course [nuudel](https://nuudel.digitalcourage.de/) and a couple other [acceptable alternatives](https://www.heise.de/tipps-tricks/Doodle-Alternativen-Die-besten-Tools-zur-Terminfindung-4964023.html), but I wanted something I can easily self-host on my quite dated own cabinet "server" (an old Thinkad X260 of course).
+There is of course [nuudel](https://nuudel.digitalcourage.de/) and a couple other [acceptable alternatives](https://www.heise.de/tipps-tricks/Doodle-Alternativen-Die-besten-Tools-zur-Terminfindung-4964023.html), but I wanted something I can easily self-host on my quite dated own cabinet "server" (an old ThinkPad X260 of course).
 
 ![My cabinet "server", a ThinkPad X260](../images/thinkpad-x260.png)
 
-Since the last time I did something *nobloat-style* has been over a year ago, I thought this i the perfect opportunity to spend some hours and build something I personally **enjoy building and using**.
+It's been over a year since I last built something *nobloat-style*, so I thought this is the perfect opportunity to spend some hours and build something I personally **enjoy building and using**.
 
 
 ## My requirements checklist
@@ -31,7 +31,7 @@ The goal was to have a tool ready by the end of the weekend that allows me to fi
 
 ### Functional
 
-- Optinally send out e-mails to participants (if they chose to by offering an optional e-mail address)
+- Optionally send out e-mails to participants (if they choose to by offering an optional e-mail address)
 - Allow public poll creation without a register/login dance
 - Basic spam protection via a simple proof of work performed by the browser
 - [i18n](https://github.com/nobloat/poll/tree/main/i18n) support
@@ -41,13 +41,13 @@ The goal was to have a tool ready by the end of the weekend that allows me to fi
 
 - Having fun in the process and create something I can enjoy looking at
 - Single statically linked cross-compilable binary I can basically deploy on anything that offers a filesystem.
-- As little external build-time and run-time dependencies as possible, so this stays low maintenance in the upcoming years. 
+- As few external build-time and run-time dependencies as possible, so this stays low maintenance in the upcoming years. 
 - Keep the state in plain text files so it's easy to reason about, backup, migrate, modify, bulk edit/create/delete.
-- Absolutely no **node, npm, yarn** madness. I usually build most of my web frontends with [Svelte](https://svelte.dev/) or [SvelteKit](https://svelte.dev/docs/kit/introduction), but this requires npm and a ton of other node modules. Again, keeping this low-maintenance without [renovate-bot](https://docs.renovatebot.com/) bot yelling at me every other day.
+- Absolutely no **node, npm, yarn** madness. I usually build most of my web frontends with [Svelte](https://svelte.dev/) or [SvelteKit](https://svelte.dev/docs/kit/introduction), but this requires npm and a ton of other node modules. Again, keeping this low-maintenance without [renovate-bot](https://docs.renovatebot.com/) yelling at me every other day.
 - Simple configuration that works inside and outside of containers
 
 
-[As it turns out](https://github.com/nobloat/poll/blob/main/go.mod), **plain go std-lib** is completely sufficient to build a simple replacement for doodle.
+[As it turns out](https://github.com/nobloat/poll/blob/main/go.mod), **plain go std-lib** is completely sufficient to build a simple replacement for Doodle.
 
 ```
 cat go.mod package.json
@@ -57,25 +57,27 @@ go 1.27.0
 cat: package.json: No such file or directory
 ```
 
-## Bypassing singnup and login
+## Bypassing signup and login
 
-To avoid having users to login and register, we create unique identifiers for them, that get created on poll creation.
+To avoid making users register and log in, every poll gets a secret owner token when it is created. The link containing it is all you need to manage the poll.
 
-If they chose to provide a mail address, this unique Link is sent to them. If not, they can copy/paste bookmark it.
+If the owner chooses to provide a mail address, this unique link is sent to them. If not, they can copy/paste or bookmark it.
 
 ```
 Hi Peter,
 
-thanks for answering "Punsch Event". Here is your personal link to change or remove it:
+your poll "Punsch Event" is live.
 
-http://localhost:8737/p/d7fminnmxnvygaxg/a/CGYZDMGL7UJ5WA4RR4ON66HBEN
+Share this link with participants:
+http://localhost:8737/p/d7fminnmxnvygaxg
 
-You'll be notified by email when the final decision is made.
+Manage it (see answers, edit, close, delete):
+http://localhost:8737/p/d7fminnmxnvygaxg/m/TMP6BZXB2SE4TOP3PVZODGRS6U
 
-This link is personal, don't share it. If you didn't answer this poll, ignore this email or use the link to remove the answer.
+The manage link is personal. Anyone with it can edit, close or delete the poll, so don't share it.
 ```
 
-Same happens on answer creation. The link allows to view, edit or delete your answer.
+The same happens when answering a poll. Every answer gets its own token, and the link allows you to view, edit or delete your answer.
 
 ```
 Hi Peter,
@@ -97,18 +99,18 @@ You can create a new poll [here](https://poll.nobloat.org/new?lang=en)
 
 ![The poll creation form](../images/poll-new.png)
 
-It asks you to enter a title and a descriptions.
+It asks you to enter a title and a description.
 Options are simply a `<textarea>` where each line represents an option.
 You can also switch between *single choice* and *multiple choice*.
-For better privacy among voters, you can also enable or disable if other participants can view each other's answers.
+For better privacy among voters, you can also choose whether participants can see each other's answers.
 To avoid having complex different poll types, I decided to have just one form but make it a bit smarter in case options are a date.
-If we detect the chosen answer is a date, the application automatically attaches an `.ics` file with the selected date/time and event description. This way, choosing a date, or choosing a pizza together can be done the same way. It also allows for easy bulk creation of answers since you can just copy/paste them in.
+Lines like `2026-10-12`, `12.10.2026`, `12.10.` (year is inferred) or `12.10.2026, 18:00–22:00` are recognized as dates, optionally with a time range. When the poll is closed and the chosen option is a date, the outcome mail sent to everybody comes with an `.ics` file attached, containing the selected date/time and the event description. This way, choosing a date or choosing a pizza together works the same way. It also allows for easy bulk creation of options since you can just copy/paste them in.
 
 ## Answering a poll
 
 ![Editing an answer via the personal link](../images/poll-answer.png)
 
-If the poll creator supplied an e-mail address, s:he receives an update mail when answers are coming in.
+If the poll creator supplied an e-mail address, they receive an update mail when answers are coming in.
 
 ```
 New answer from Grace: Pizza Friday
@@ -128,19 +130,29 @@ http://localhost:8737/p/pizza-friday/m/ASEIRUQD7POJBVG6VITTHGCIIK
 ```
 
 
-## Keyboard short cuts
+## Keyboard shortcuts
 
-All actions can be reached via keyboard shortcuts so you don't have to use the mouse at all. Each shortcut is indicated next to where it applies.
+All actions can be reached via keyboard shortcuts so you don't have to use the mouse at all. Each shortcut is shown as a small `<kbd>` hint next to where it applies: `1`–`9` toggle the options, `n` jumps to the name field, `e` to the e-mail field, `s` submits, and `Ctrl+Enter` submits from inside any field. On the manage page, `c` copies the share link and `1`–`9` pick the final option.
+
+Under the hood, it's just a `data-key` attribute in the HTML templates and a single `keydown` listener in `app.js`.
+
+## Spam protection without a captcha
+
+Since anybody can create polls on [poll.nobloat.org](https://poll.nobloat.org), I needed some basic protection against bots, but without captchas or third-party services.
+
+Before a form is submitted, the browser fetches a challenge from `/pow`. The challenge contains a timestamp and a random value, signed with an HMAC, so the server doesn't need to store it. The browser then brute-forces a nonce until the SHA-256 hash of challenge + nonce starts with 16 zero bits, using the built-in `crypto.subtle.digest`. That's roughly 65,000 hashes, done in well under a second on a normal device. The server verifies the result with a single hash, rejects challenges older than 2 hours, and remembers used ones so they can't be replayed.
+
+This won't stop a determined attacker, but it makes mass submissions expensive enough that dumb bots move on.
 
 
 ## Skipping the database
 
-Postgres was out of question as a runtime dependency for this project for obvious reasons. 
-Sqlite would have been fine for me, but it requires `CGO` which introduces a whole lot other set of problems when cross compiling. So I decided to keep it even more minimal and just store the polls in simple `.json` files.
+Postgres was out of the question as a runtime dependency for this project for obvious reasons.
+SQLite would have been fine for me, but the common Go driver requires `CGO`, which introduces a whole other set of problems when cross compiling. Pure-Go ports like `modernc.org/sqlite` exist, but they are yet another external dependency. So I decided to keep it even more minimal and just store the polls in simple `.json` files.
 
-All modifications go through a single global lock. That's the bottleneck if thousands of people vote at the same time, which is not a problem I have. The poll definition as well as the answer's from voters are stored in the same file. 
+All modifications go through a single global lock. That's the bottleneck if thousands of people vote at the same time, which is not a problem I have. The poll definition as well as the answers from voters are stored in the same file.
 
-The file is named according to the generated event ID: ``
+The file is named after the generated poll ID: `data/polls/<id>.json`
 
 ```
 cat data/polls/d7fminnmxnvygaxg.json
@@ -165,7 +177,7 @@ cat data/polls/d7fminnmxnvygaxg.json
   "owner_lang": "en",
   "owner_token": "TMP6BZXB2SE4TOP3PVZODGRS6U",
   "theme": "minimal"
-}⏎
+}
 ```
 
 But what happens if the process crashes or the power goes out in the middle of writing a poll? With a plain `os.WriteFile` you could end up with a truncated, half-written `.json` file, and the poll would be gone.
@@ -183,20 +195,20 @@ s.syncDir()                         // the rename itself is on disk
 
 The last `fsync` on the directory makes sure the rename survives a power loss too. If we crash before the rename, only a stale `.tmp-*` file is left behind, and those get cleaned up on the next startup.
 
-## Relyably sending mails
+## Reliably sending mails
 
-In order to not lose any outgoing messages (e.g. when the poll is closed), all recipients are contacted with the result. Therefore, we need some kind of relyable e-mail sending mechanism.
+When a poll is closed, every participant who left an e-mail address gets the outcome, so mails must not get lost. Therefore, we need some kind of reliable e-mail sending mechanism.
 
-Go does bring out of the box `SMTP` support. The easiest way is to just start one `goroutine` per recipient and call it a day. But SMTP can fail or we can decide to restart the application while mails are sent out. 
+Go ships `SMTP` support out of the box with `net/smtp`. The easiest way is to just start one `goroutine` per recipient and call it a day. But SMTP can fail or we can decide to restart the application while mails are sent out. 
 
 To avoid such issues, one usually uses an asynchronous job queue like `redis` or [river queue](https://riverqueue.com/) for postgres. Of course neither is an option for this project.
 
-So we are keeping a [peristed outbox](https://github.com/nobloat/poll/blob/main/outbox.go) under `./data/mail` that stores each mail on disk, that needs to be sent out. 
+So we are keeping a [persisted outbox](https://github.com/nobloat/poll/blob/main/outbox.go) under `./data/mail` that stores each mail that needs to be sent out on disk.
 
-On application startup we also check for not yet sent messages. 
-This gives us [at least once] delivery gurantee, with re-sends happening only mid-crashes.
+On application startup we also check for not yet sent messages.
+This gives us an [at-least-once](https://en.wikipedia.org/wiki/Message_queue#Delivery_guarantees) delivery guarantee, with duplicates only if we crash mid-send.
 
-Shutdown of the application [happens gracefully](https://github.com/nobloat/poll/blob/main/main.go#L96) and awaits at least the currently sent out message.
+Shutdown of the application [happens gracefully](https://github.com/nobloat/poll/blob/820d66036f974ffbc0d8e270ce57fe09ad9985a2/main.go#L94-L104) and waits for the mail currently being sent.
 
 ## Deployment
 
@@ -240,6 +252,8 @@ html/template, text/template     0.2 MB
 nobloat/poll                     0.1 MB
 ```
 
+That only adds up to about 4 MB of the 9.1 MB. The rest is mostly `.gopclntab` (~3.1 MB, the table that maps machine code back to functions and line numbers). Go keeps it even in stripped binaries, because the runtime needs it for stack traces, panics and the garbage collector. `readelf -SW poll` shows the section sizes.
+
 Comparing builds with and without the build tags:
 
 ```
@@ -267,7 +281,7 @@ upx -q --best poll
 3,624,388 bytes  poll (upx --best)
 ```
 
-That's **3.5 MB**, a reduction of about 62%. It doesn't come for free though. Startup time increases quite alot, but this doesnt really bother me.
+That's **3.5 MB**, a reduction of about 62%. It doesn't come for free though. Startup time increases quite a lot, but this doesn't really bother me.
 
 ```
                  startup   peak memory
@@ -277,7 +291,7 @@ poll (upx)       32 ms     14.7 MB
 
 ## Summary
 
-It is now sunday afternoon, 14:00 and this was fun to build, even though it turned out to be not as minimal as I hoped for. But I do like that it doesnt use any external dependencies except for the SMTP gateway to send out emails, and even these are optional.
+It is now Sunday afternoon, 14:00 and this was fun to build, even though it turned out to be not as minimal as I hoped for. But I do like that it doesn't use any external dependencies except for the SMTP gateway to send out emails, and even these are optional.
 
 
 **I have now a poll tool I enjoy using.** - mission accomplished.
@@ -287,4 +301,4 @@ I could still leave out the JavaScript stuff itself, but I like it for the short
 
 Everybody else [is welcome to use](https://poll.nobloat.org) it as well. No service guarantees though, I tend to reboot my X260 from time to time.
 
-It's licesned under [AGPL-3.0](https://github.com/nobloat/poll/blob/main/LICENSE).
+It's licensed under [AGPL-3.0](https://github.com/nobloat/poll/blob/main/LICENSE).
