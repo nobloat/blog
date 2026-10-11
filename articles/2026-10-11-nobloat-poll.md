@@ -12,10 +12,10 @@ So, I wanted to send out a poll for our yearly "zeitkapsl Punsch" event, were we
 
 Usually I used Doodle for that, but apparently a lot has happened there over the past year, and the path to enshi***ation has proceeded a lot further:
 
-- You have to leave your e-mail address even as a participant
+- You have to leave your e-mail address even as a participant.
 - You can no longer have more than one poll in total in the "free account".
-- You can't export your participant list
-- Loading the poll page takes around 3 seconds, and downloads 4.7 MB in resources.
+- You can't export your participant list.
+- Loading the poll page takes around 3 seconds, and downloads 4.7 MB JavaScript.
 - You are flashed by so many pop-ups.
 
 There is of course [nuudel](https://nuudel.digitalcourage.de/) and a couple other [acceptable alternatives](https://www.heise.de/tipps-tricks/Doodle-Alternativen-Die-besten-Tools-zur-Terminfindung-4964023.html), but I wanted something I can easily self-host on my quite dated own cabinet "server" (an old Thinkad X260 of course).
@@ -185,13 +185,11 @@ The last `fsync` on the directory makes sure the rename survives a power loss to
 
 ## Relyably sending mails
 
-In order to not lose any outgoing messages (e.g. when the poll is closed), all recipients are contacted with the result, we need some kind of relyable e-mail sending mechanism.
+In order to not lose any outgoing messages (e.g. when the poll is closed), all recipients are contacted with the result. Therefore, we need some kind of relyable e-mail sending mechanism.
 
 Go does bring out of the box `SMTP` support. The easiest way is to just start one `goroutine` per recipient and call it a day. But SMTP can fail or we can decide to restart the application while mails are sent out. 
 
-To avoid such issues, one usually uses an asynchronous job queue like `redis` or [river queue](https://riverqueue.com/) for postgres.
-
-Of course neither is an option for this project.
+To avoid such issues, one usually uses an asynchronous job queue like `redis` or [river queue](https://riverqueue.com/) for postgres. Of course neither is an option for this project.
 
 So we are keeping a [peristed outbox](https://github.com/nobloat/poll/blob/main/outbox.go) under `./data/mail` that stores each mail on disk, that needs to be sent out. 
 
