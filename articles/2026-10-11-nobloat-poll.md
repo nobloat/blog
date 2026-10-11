@@ -4,13 +4,15 @@ So, I wanted to send out a poll for our yearly "zeitkapsl Punsch" event, where w
 
 > "... I opened up Doodle, trying to create a new poll for an event. I was immediately greeted with flashing popups stating I have to upgrade to pro now. I kept searching for where to delete my existing polls. It was not easy. I finally figured it out and was able to create the poll for my punsch event. But it left me wondering: how is everybody else tolerating this?"
 
+![A hand-drawn poll: "How to name the office plant?" Options: go fern(), /dev/leaf, Monstera Monolith and Photosynthesis as a Service](../images/office-plant.svg)
+
 ## TL;DR
 
 [nobloat/poll](https://github.com/nobloat/poll) is a self-hostable single-binary Doodle alternative written in plain `go` with [no further dependencies](https://github.com/nobloat/poll/blob/main/go.mod). It doesn't require a database, job queue, npm or node. It works without signups. Every poll is a single JSON file, the whole thing ships as one 3.5 MB binary, and a page loads ~27 KB (6.9 kB + 20 kB uncompressed JavaScript and CSS). You can use it at [poll.nobloat.org](https://poll.nobloat.org). There is no "pro version" of it.
 
 ## There was Doodle
 
-I usually used Doodle for that, but apparently a lot has happened there over the past year, and the path to enshi***ation has proceeded a lot further:
+I usually used Doodle for that, but apparently a lot has happened there over the past year, and the path to [enshi***ation has proceeded](https://www.youtube.com/watch?v=T4Upf_B9RLQ) a lot further:
 
 - You have to leave your e-mail address even as a participant.
 - You can no longer have more than one poll in total in the "free account", even if the old one is already closed.
@@ -293,11 +295,9 @@ poll (upx)       32 ms     14.7 MB
 
 It is now Sunday afternoon, 14:00 and this was fun to build, even though it turned out to be not as minimal as I hoped for. But I do like that it doesn't use any external dependencies except for the SMTP gateway to send out emails, and even these are optional.
 
-
 **I have now a poll tool I enjoy using.** - mission accomplished.
 
-
-I could still leave out the JavaScript stuff itself, but I like it for the shortcuts and interactivity improvements it delivers. 
+I could still leave out the JavaScript stuff itself, but I like it for the shortcuts, proof-of-work and interactivity improvements it delivers. 
 
 Everybody else [is welcome to use](https://poll.nobloat.org) it as well. No service guarantees though, I tend to reboot my X260 from time to time.
 
