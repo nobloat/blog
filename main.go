@@ -279,6 +279,9 @@ func generatePosts(posts []Post) {
 	}
 	tmpl := template.Must(template.New("post").Funcs(funcMap).Parse(string(tpl)))
 	for _, post := range posts {
+		d := post.Date.Format("2006-01-02")
+		date := `<time class="post-date" datetime="` + d + `">` + d + "</time>\n<h1>"
+		post.Content = template.HTML(strings.Replace(string(post.Content), "<h1>", date, 1))
 		var buf bytes.Buffer
 		tmpl.Execute(&buf, struct {
 			Title   string
