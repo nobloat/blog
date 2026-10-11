@@ -21,6 +21,7 @@ var config = Config{
 		"spiessknafl.at/peter":                               "https://spiessknafl.at/peter",
 	},
 	Projects: map[string]string{
+		"[nobloat/poll](https://github.com/nobloat/poll)":                                         "minimal alternative to doodle",
 		"[nobloat/css](https://github.com/nobloat/css)":                                           "modular vanilla CSS3 components",
 		"[nobloat/bare-jvm](https://github.com/nobloat/bare-jvm)":                                 "[baremessages](https://baremessages.org/) implementation for the JVM",
 		"[cinemast/dbolve](https://github.com/cinemast/dbolve)":                                   "database migration tool for golang projects",

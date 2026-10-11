@@ -9,10 +9,10 @@
     --c-bg-dark: var(--c-fg-light);
     --c-fg-dark: var(--c-bg-light);
     --c-hi-dark: var(--c-bg-light);
-    --c-lo-dark: #555;
+    --c-lo-dark: #9a9a9a;
 
     --radius: 5px;
-    --content-max-width: 120ch;
+    --content-max-width: 72ch;
 }
 
 *,
@@ -26,7 +26,7 @@ body {
     margin: 0;
     background: light-dark(var(--c-bg-light), var(--c-bg-dark));
     color: light-dark(var(--c-fg-light), var(--c-fg-dark));
-    line-height: 1.4;
+    line-height: 1.6;
     padding: clamp(1rem, 3vw, 3rem) clamp(1.5rem, 5vw, 4.5rem);
     word-wrap: break-word;
     display: flex;
@@ -42,21 +42,18 @@ body > * {
 @media (min-width: 768px) {
     body {
         font-size: 1.1rem;
-        line-height: 1.5;
     }
 }
 
 @media (min-width: 1400px) {
     body {
         font-size: 1.2rem;
-        line-height: 1.5;
     }
 }
 
 @media (min-width: 1920px) {
     body {
         font-size: 1.3rem;
-        line-height: 1.6;
     }
 }
 
@@ -73,7 +70,8 @@ a {
     transition: color 0.2s ease;
 }
 
-h1 > a {
+h1 > a,
+h2 > a {
     text-decoration: none;
 }
 
@@ -96,21 +94,21 @@ a:hover {
 }
 
 h1 {
-    font-size: 2.5rem;
+    font-size: clamp(1.8rem, 6vw, 2.5rem);
     text-align: center;
 }
 
 h2 {
-    font-size: 2rem;
+    font-size: clamp(1.4rem, 4vw, 1.8rem);
+    position: relative;
 }
 
 h1,
 h2,
 h3 {
-    padding-left: 0.5rem;
     font-family: monospace;
-    margin-top: 4rem;
-    text-shadow: 9px 6px 13px 2px rgba(0, 0, 0, 0.1);
+    line-height: 1.25;
+    margin-top: 3em;
 }
 
 ul {
@@ -181,6 +179,28 @@ pre {
 
 code {
     font-family: monospace;
+}
+
+/* prose: keep monospace for chrome, plain text for reading */
+article a {
+    font-family: inherit;
+    font-weight: inherit;
+}
+
+article ul {
+    font-family: inherit;
+    line-height: inherit;
+}
+
+article li + li {
+    margin-top: 0.4em;
+}
+
+article :not(pre) > code {
+    font-size: 0.9em;
+    padding: 0.1em 0.3em;
+    border-radius: var(--radius);
+    background: light-dark(rgba(24, 24, 27, 0.08), rgba(255, 255, 255, 0.1));
 }
 
 blockquote {

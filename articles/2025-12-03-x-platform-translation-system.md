@@ -231,7 +231,7 @@ Shows translation coverage:
 
 ## The Implementation
 
-The tool is written in Go and can be found [here](https://github.com/zeitkapsl/zeitkapsl/translations):
+The tool is written in Go and can be found [here](https://codeberg.org/zeitkapsl/zeitkapsl/src/branch/main/translations):
 
 **Importers**: Platform-specific parsers (iOS `.xcstrings`, Android XML, JSON)
 
@@ -312,7 +312,7 @@ Changes not staged for commit:
 
 **Translation service**: Pluggable interface for AI translation (DeepL, Azure)
 
-````
+```
 $> go run . auto-translate
 Using DeepL translation service
 Loaded 940 translations from translations.csv
