@@ -151,11 +151,12 @@ func formatInline(text string) string {
 
 func parseMarkdown(input string) (content string, title string, excerpt string) {
 	lines := strings.Split(input, "\n")
-	var out, exc strings.Builder
+	var out, exc, tldr strings.Builder
 	inList := false
 	inCode := false
 	codeLang := ""
 	firstParagraphCaptured := false
+	inTLDR := false
 
 	if len(lines) > 0 && strings.HasPrefix(lines[0], "# ") {
 		title = strings.TrimPrefix(lines[0], "# ")
@@ -208,6 +209,7 @@ func parseMarkdown(input string) (content string, title string, excerpt string) 
 				out.WriteString("</ul>\n")
 				inList = false
 			}
+			inTLDR = strings.EqualFold(strings.TrimPrefix(line, "## "), "TL;DR")
 			id := sanitizeAnchor(strings.TrimPrefix(line, "## "))
 			out.WriteString("<h2 id=\"" + id + "\"><a href=\"#" + id + "\">" + formatInline(strings.TrimPrefix(line, "## ")) + "</a></h2>\n")
 		case strings.HasPrefix(line, "### "):
@@ -238,6 +240,9 @@ func parseMarkdown(input string) (content string, title string, excerpt string) 
 				exc.WriteString(paragraph)
 				firstParagraphCaptured = true
 			}
+			if inTLDR && tldr.Len() == 0 {
+				tldr.WriteString(paragraph)
+			}
 		}
 	}
 	if inList {
@@ -245,6 +250,9 @@ func parseMarkdown(input string) (content string, title string, excerpt string) 
 	}
 	if inCode {
 		out.WriteString("</code></pre>\n</div>\n")
+	}
+	if tldr.Len() > 0 {
+		return out.String(), title, tldr.String()
 	}
 	return out.String(), title, exc.String()
 }
